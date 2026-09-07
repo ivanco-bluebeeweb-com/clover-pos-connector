@@ -53,7 +53,7 @@ async def connect_clover_pos_connector(params: ConnectParams, ctx) -> ActionResu
     for c in conns: c["is_active"] = False
     conns.append(rec)
     await _save_conns(ctx, conns)
-    return ActionResult.ok(rec, summary=f"Connected Clover POS ({rec['label']}).")
+    return ActionResult.success(rec, summary=f"Connected Clover POS ({rec['label']}).")
 
 @chat.function("list_connections", "List configured Clover POS connections.", action_type="read", chain_callable=True, event="clover-pos-connector.list_connections", effects=["read:connections"], data_model=ConnectionList)
 async def list_connections(params: NoParams, ctx) -> ActionResult:
@@ -65,7 +65,7 @@ async def list_connections(params: NoParams, ctx) -> ActionResult:
         "base_url": c.get("base_url", "https://api.clover.com/v3"),
         "is_active": c.get("is_active", False)
     } for c in conns]
-    return ActionResult.ok({"connections": items, "total": len(items)}, summary=f"Found {len(items)} connection(s).")
+    return ActionResult.success({"connections": items, "total": len(items)}, summary=f"Found {len(items)} connection(s).")
 
 @chat.function("disconnect_clover_pos_connector", "Disconnect Clover POS account and delete stored credentials.", action_type="destructive", chain_callable=True, event="clover-pos-connector.disconnect_clover_pos_connector", effects=["delete:connection"], data_model=DeleteResult)
 async def disconnect_clover_pos_connector(params: ConnectionIdParams, ctx) -> ActionResult:
@@ -77,4 +77,4 @@ async def disconnect_clover_pos_connector(params: ConnectionIdParams, ctx) -> Ac
     else:
         conns.clear()
     await _save_conns(ctx, conns)
-    return ActionResult.ok({"success": True, "message": "Disconnected successfully."}, summary="Disconnected Clover POS connection.")
+    return ActionResult.success({"success": True, "message": "Disconnected successfully."}, summary="Disconnected Clover POS connection.")
