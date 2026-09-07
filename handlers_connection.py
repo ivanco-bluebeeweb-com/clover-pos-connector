@@ -35,7 +35,7 @@ async def resolve_client(ctx, connection_id: str = "") -> CloverPOSClient:
     return CloverPOSClient(access_token=conn["access_token"], base_url=conn.get("base_url", ""))
 
 @chat.function("connect_clover_pos_connector", "Connect Clover POS account via credentials.", action_type="write", chain_callable=True, event="clover-pos-connector.connect_clover_pos_connector", effects=["create:connection"], data_model=ConnectionRecord)
-async def connect_clover_pos_connector(params: ConnectParams, ctx) -> ActionResult:
+async def connect_clover_pos_connector(ctx, params: ConnectParams) -> ActionResult:
     client = CloverPOSClient(access_token=params.access_token, base_url=params.base_url)
     res = await client.verify_auth()
     if res.get("status") == "error":
@@ -56,7 +56,7 @@ async def connect_clover_pos_connector(params: ConnectParams, ctx) -> ActionResu
     return ActionResult.success(rec, summary=f"Connected Clover POS ({rec['label']}).")
 
 @chat.function("list_connections", "List configured Clover POS connections.", action_type="read", chain_callable=True, event="clover-pos-connector.list_connections", effects=["read:connections"], data_model=ConnectionList)
-async def list_connections(params: NoParams, ctx) -> ActionResult:
+async def list_connections(ctx, params: NoParams) -> ActionResult:
     conns = await _load_conns(ctx)
     items = [{
         "id": c["id"],
@@ -68,7 +68,7 @@ async def list_connections(params: NoParams, ctx) -> ActionResult:
     return ActionResult.success({"connections": items, "total": len(items)}, summary=f"Found {len(items)} connection(s).")
 
 @chat.function("disconnect_clover_pos_connector", "Disconnect Clover POS account and delete stored credentials.", action_type="destructive", chain_callable=True, event="clover-pos-connector.disconnect_clover_pos_connector", effects=["delete:connection"], data_model=DeleteResult)
-async def disconnect_clover_pos_connector(params: ConnectionIdParams, ctx) -> ActionResult:
+async def disconnect_clover_pos_connector(ctx, params: ConnectionIdParams) -> ActionResult:
     conns = await _load_conns(ctx)
     if not conns:
         return ActionResult.error("No connections to disconnect.")
